@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using App.Forms;
 
 namespace App
 {
@@ -19,7 +20,7 @@ namespace App
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(services.GetService<Form1>());
+            Application.Run(services.GetService<MainForm>());
         }
 
 
@@ -28,7 +29,7 @@ namespace App
             return Host.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>
                 {
-                    services.AddTransient<Form1>();
+                    services.AddTransient<MainForm>();
                 });
         }
     }
