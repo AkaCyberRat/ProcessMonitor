@@ -1,20 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using App.Services.ProcessService;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace App.Forms
 {
-    public partial class MainForm : Form
+    internal partial class MainForm : Form
     {
-        public MainForm()
+        private readonly IProcessService _processService;
+        private readonly Timer _timer;
+
+        public MainForm(IProcessService processService)
         {
             InitializeComponent();
+
+            _processService = processService;
+
+            _timer = new Timer();
+            _timer.Tick += UpdateTable;
+            _timer.Interval = 500;
+            _timer.Enabled = true;
         }
+
+        private async void UpdateTable(object sender, EventArgs e)
+        {
+            _timer.Enabled = false;
+
+            var processes = await Task.Run(() => { return _processService.GetActiveProcesses(); });
+            _dataGridView.DataSource = processes;
+
+            _timer.Enabled = true;
+        }
+
+
     }
 }
