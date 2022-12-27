@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace App.Services.ProcessService
 {
@@ -13,29 +14,39 @@ namespace App.Services.ProcessService
             _logger = logger;
         }
 
-        public Process[] GetActiveProcesses()
+        public Core.Process[] GetActiveProcesses()
         {
             _logger.LogDebug("Getting active processes.");
 
             var processes = System.Diagnostics.Process.GetProcesses();
-            var models = new List<Process>(processes.Length);
+            var models = new List<Core.Process>(processes.Length);
             
             foreach (var process in processes)
             {
-                models.Add(new Process()
+                Core.Process model = null;
+
+                try
                 {
-                    Id = process.Id.ToString(),
-                    Name = process.ProcessName,
-                    MachineName = process.MachineName,
-                    PriorityClass = process.PriorityClass.ToString(),
-                    StartTime = process.StartTime,
-                });
+                    model = new Core.Process();
+
+                    model.Id = process.Id.ToString();
+                    model.Name = process.ProcessName;
+                    model.MachineName = process.MachineName;
+                    model.PriorityClass = process.PriorityClass.ToString();
+                    model.StartTime = process.StartTime;
+                    
+                } 
+                catch(Exception e){
+                    _logger.LogError($"Process binding exception: {e.Message}");
+                }
+
+                models.Add(model);
             }
 
             return models.ToArray();
         }
 
-        public Process GetProcessById(string id)
+        public Core.Process GetProcessById(string id)
         {
             _logger.LogDebug($"Getting process by id {id}.");
 
@@ -46,7 +57,7 @@ namespace App.Services.ProcessService
 
             var process = System.Diagnostics.Process.GetProcessById(resultId);
 
-            var model = new Process()
+            var model = new Core.Process()
             {
                 Id = process.Id.ToString(),
                 Name = process.ProcessName,
@@ -58,7 +69,7 @@ namespace App.Services.ProcessService
             return model;
         }
 
-        public Process KillProcessById(string id)
+        public Core.Process KillProcessById(string id)
         {
             _logger.LogDebug($"Kill process by id {id}.");
 
@@ -69,7 +80,7 @@ namespace App.Services.ProcessService
             }
 
             var process = System.Diagnostics.Process.GetProcessById(resultId);
-            var model = new Process()
+            var model = new Core.Process()
             {
                 Id = process.Id.ToString(),
                 Name = process.ProcessName,
