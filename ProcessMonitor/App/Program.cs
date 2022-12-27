@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using App.Forms;
+using App.Services.ProcessService;
 
 namespace App
 {
@@ -12,11 +14,10 @@ namespace App
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
-            var host = CreateHostBuilder(args).Build();
+            var host = CreateHostBuilder(Array.Empty<string>()).Build();
             var services = host.Services;
-
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -27,8 +28,14 @@ namespace App
         static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(lb =>
+                {
+                    lb.SetMinimumLevel(LogLevel.Debug);
+                    lb.AddDebug();
+                })
                 .ConfigureServices(services =>
                 {
+                    services.AddSingleton<IProcessService,  ProcessService>();
                     services.AddTransient<MainForm>();
                 });
         }
