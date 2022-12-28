@@ -1,8 +1,7 @@
-﻿using App.Core;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using App.Core;
 
 namespace App.Services.ProcessService
 {
@@ -14,7 +13,7 @@ namespace App.Services.ProcessService
             _logger = logger;
         }
 
-        public Core.Process[] GetActiveProcesses()
+        public Process[] GetActiveProcesses()
         {
             _logger.LogDebug("Getting active processes.");
 
@@ -46,41 +45,62 @@ namespace App.Services.ProcessService
             return models.ToArray();
         }
 
-        public Core.Process GetProcessById(string id)
+        public ProcessCompact[] GetActiveProcessesCompact()
+        {
+            _logger.LogDebug("Getting active processes.");
+
+            var processes = System.Diagnostics.Process.GetProcesses();
+            var models = new List<ProcessCompact>(processes.Length);
+
+            foreach (var process in processes)
+            {
+                var model = new ProcessCompact();
+                model.Id = process.Id.ToString();
+                model.Name = process.ProcessName;
+
+                models.Add(model);
+            }
+
+            return models.ToArray();
+        }
+
+        public Process GetProcessById(string id)
         {
             _logger.LogDebug($"Getting process by id {id}.");
 
             if (!int.TryParse(id, out int resultId)){
-                _logger.LogError($"Get process error, unsupported id format : Id={id}.");
-                throw new ArgumentException("Unsupported id format");
+                var e = new ArgumentException($"Unsupported id format Id={id}");
+                _logger.LogError($"Get process error: {e.Message}.");
+                throw e;
             }
 
             var process = System.Diagnostics.Process.GetProcessById(resultId);
 
-            var model = new Core.Process()
+            var model = new Process()
             {
                 Id = process.Id.ToString(),
                 Name = process.ProcessName,
                 MachineName = process.MachineName,
                 PriorityClass = process.PriorityClass.ToString(),
-                StartTime = process.StartTime,
+                StartTime = process.StartTime
             };
 
             return model;
         }
 
-        public Core.Process KillProcessById(string id)
+        public Process KillProcessById(string id)
         {
             _logger.LogDebug($"Kill process by id {id}.");
 
             if (!int.TryParse(id, out int resultId))
             {
-                _logger.LogError($"Kill process error, unsupported id format : Id={id}.");
-                throw new ArgumentException("Unsupported id format");
+                var e = new ArgumentException($"Unsupported id format Id={id}");
+                _logger.LogError($"Kill process error: {e.Message}.");
+                throw e;
             }
 
             var process = System.Diagnostics.Process.GetProcessById(resultId);
-            var model = new Core.Process()
+            var model = new Process()
             {
                 Id = process.Id.ToString(),
                 Name = process.ProcessName,

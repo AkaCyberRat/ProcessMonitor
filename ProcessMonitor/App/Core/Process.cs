@@ -10,4 +10,12 @@ namespace App.Core
         public string PriorityClass { get; set; }
         public DateTime StartTime { get; set; }
     }
+
+    internal class ProcessCompact
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+
+
 }
