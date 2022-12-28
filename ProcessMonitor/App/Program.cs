@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using App.Forms;
 using App.Services.ProcessService;
+using Microsoft.Extensions.Configuration;
+using App.Logging;
 
 namespace App
 {
@@ -28,10 +30,15 @@ namespace App
         static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(lb =>
+                .ConfigureDefaults(args)
+                .ConfigureAppConfiguration(b =>
                 {
-                    lb.SetMinimumLevel(LogLevel.Debug);
+                    b.AddJsonFile("appsettings.json");
+                })
+                .ConfigureLogging((ctx, lb) => {
                     lb.AddDebug();
+                    lb.AddFileLogging(ctx.Configuration);
+                
                 })
                 .ConfigureServices(services =>
                 {
